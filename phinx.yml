@@ -1,0 +1,62 @@
+paths:
+    migrations: %%PHINX_CONFIG_DIR%%/migrations
+        
+environments:
+    default_migration_table: phinxlog_student_portal
+    default_database: local
+
+    local:
+        adapter: mysql
+        host: 127.0.0.1
+        name: grail
+        user: dev_admin
+        pass: 'R3volution!'
+        port: 3306
+                    
+    qa:
+        adapter: mysql
+        host: localhost
+        name: grail
+        user: qadmin 
+        pass: 'Ch1ggers!'
+        port: 3306
+                 
+    dev:
+        adapter: mysql
+        host: 127.0.0.1
+        name: grail
+        user: dev_admin
+        pass: 'R3volution!'
+        port: 3306
+
+    dev2:
+        adapter: mysql
+        host: 127.0.0.1
+        name: grail
+        user: dev_admin
+        pass: 'R3volution!'
+        port: 3306
+
+    demo:
+        adapter: mysql
+        host: 127.0.0.1
+        name: grail
+        user: dev_admin
+        pass: 'R3volution!'
+        port: 3306
+
+    test:
+        adapter: mysql
+        host: %{test_grail_db_host}
+        name: %{test_grail_db_db}
+        user: %{test_grail_db_user} 
+        pass: %{test_grail_db_pass}
+        port: 3306
+
+    prod:
+        adapter: mysql
+        host: %{prod_grail_db_host}
+        name: %{prod_grail_db_db} 
+        user: %{prod_grail_db_user} 
+        pass: %{prod_grail_db_pass} 
+        port: 3306

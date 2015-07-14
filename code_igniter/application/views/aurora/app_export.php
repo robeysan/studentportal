@@ -1,0 +1,54 @@
+<?php
+
+	echo   	$prefix.'|'.
+			$first_name.'|'.
+			$middle_name.'|'.
+			$last_name.'|'.
+			$other_name.'|'.
+			$suffix.'|'.
+			$address1.'|'.
+			$address2.'|'.
+			$city.'|'.
+			$zip_code.'|'.
+			$state.'|'.
+			$country.'|'.
+			$home_phone.'|'.
+			$cell_phone.'|'.
+			$email.'|'.
+			$social_tax_id.'|'.
+			$dob.'|'.
+			$gender.'|'.
+			$marital_status.'|'.
+			$religous_preference.'|'.
+			$teaching_certificate_license.'|'.
+			$teaching_certificate_license_number.'|'.
+			$degree_type.'|'.
+			$attending.'|'.
+			$start_term.'|'.
+			$refered_by.'|'.
+			$resident.'|'.
+			$fin_aid.'|'.
+			$fasfa.'|'.
+			$citizen.'|'.
+			$veteran.'|'.
+			$veteran_benifits.'|'.
+			$disciplinary_dismissal.'|'.
+			$criminal_conviction.'|'.
+			$hispanic_latino.'|'.
+			$racial_identity.'|'.
+			$preferred_major.'|'.
+			$college_credit.'|'.
+			$txtPriorCollege1.'|'.
+			$txtPriorCollege1ceeb.'|'.
+			$txtPriorCollege2.'|'.
+			$txtPriorCollege2ceeb.'|'.
+			$txtPriorCollege3.'|'.
+			$txtPriorCollege3ceeb.'|'.
+			$txtPriorCollege4.'|'.
+			$txtPriorCollege4ceeb.'|'.
+			$txtPriorCollege5.'|'.
+			$txtPriorCollege5ceeb.'|'.
+			$bachelors_degree.'|'.
+			$emergency_contact_name.'|'.
+			$emergency_contact_main_phone."\r\n";
+?>

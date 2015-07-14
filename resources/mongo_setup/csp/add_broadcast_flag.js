@@ -1,0 +1,5 @@
+var x = new Mongo('127.0.0.1:27017');
+var mydb = x.getDB('csp');
+var numMessages = mydb.messages.find({"text":"Thanks for your interest in Concordia University - Saint Paul. I'm here to help guide you through every step of the application process. The first thing you need to do is click on that big blue button to the right and fill out our online application. Don't worry, it's quick and easy! If I can help in any way, please click REPLY below (or my picture to the right) and send me a message."}).count();
+mydb.messages.update({"text":"Thanks for your interest in Concordia University - Saint Paul. I'm here to help guide you through every step of the application process. The first thing you need to do is click on that big blue button to the right and fill out our online application. Don't worry, it's quick and easy! If I can help in any way, please click REPLY below (or my picture to the right) and send me a message."}, {$set: {"broadcast":"true"}}, false, true);
+print(numMessages + " messages updated.");

@@ -1,0 +1,17 @@
+RewriteEngine on
+RewriteCond $1 !^(index\.php|captcha|images|js|css|img|robots\.txt)
+RewriteRule ^(.*)$ /index.php/$1 [L]
+RewriteCond %{HTTP_HOST} ^gwc.learninghouse.com$
+RewriteRule (.*)$ http://aurora.learninghouse.com/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^gwc.local.learninghouse.com$
+RewriteRule (.*)$ http://aurora.local.learninghouse.com/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^gwc.qa.learninghouse.com$
+RewriteRule (.*)$ http://aurora.qa.learninghouse.com/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^gwc.test.learninghouse.com$
+RewriteRule (.*)$ http://aurora.test.learninghouse.com/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^gwc.demo.learninghouse.com$
+RewriteRule (.*)$ http://aurora.demo.learninghouse.com/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^gwc.dev.learninghouse.com$
+RewriteRule (.*)$ http://aurora.dev.learninghouse.com/$1 [R=301,L]
+RewriteCond %{HTTP_HOST} ^gwc.dev2.learninghouse.com$
+RewriteRule (.*)$ http://aurora.dev2.learninghouse.com/$1 [R=301,L]

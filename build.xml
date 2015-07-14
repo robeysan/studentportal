@@ -1,0 +1,377 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<project description="" name="Student Portal" default="build" basedir=".">
+    <property file="build/base.properties" />
+    <!-- ============================================ -->
+    <!-- Conditional params for test/prod             -->
+    <!-- ============================================ -->
+    <if>
+        <or>
+            <equals arg1="${env}" arg2="test" />
+            <equals arg1="${env}" arg2="prod" />
+        </or>
+        <then>
+            <property name="server.basepath" value="${${env}.server.basepath}" />
+            <property name="server.releases" value="${${env}.server.releases}" />
+            <property name="server.host" value="${${env}.server.host}" />
+            <property name="locked.auth.db.host" value="${${env}.auth.db.host}" />
+            <property name="locked.auth.db.user" value="${${env}.auth.db.user}" />
+            <property name="locked.auth.db.pass" value="${${env}.auth.db.pass}" />
+            <property name="locked.auth.db.db" value="${${env}.auth.db.db}" />
+            <property name="locked.grail.db.host" value="${${env}.grail.db.host}" />
+            <property name="locked.grail.db.user" value="${${env}.grail.db.user}" />
+            <property name="locked.grail.db.pass" value="${${env}.grail.db.pass}" />
+            <property name="locked.grail.db.db" value="${${env}.grail.db.db}" />
+        </then>
+        <else>
+            <property file="build/${env}.properties" />
+            <property name="server.releases" value="${server.releases}" />
+            <property name="server.host" value="${host}" />
+        </else>
+    </if>
+
+    <!-- ============================================ -->
+    <!-- Set default values of some properties        -->
+    <!-- ============================================ -->
+    <if>
+        <isset property="build.env" />
+        <then>
+            <property name="env" value="${build.env}" />
+        </then>
+        <else>
+            <property name="env" value="local" />
+        </else>
+    </if>
+    <if>
+        <isset property="ver" />
+        <then>
+            <property name="migrations.version" value="${ver}" />
+        </then>
+    </if>
+
+    <tstamp>
+        <format property="build.time" pattern="%Y%m%d_%H%M%S" />
+    </tstamp>
+
+    <!-- ============================================  -->
+    <!-- Target: prepare                               -->
+    <!-- ============================================  -->
+    <target name="preparebuild">
+        <echo msg="========================================================================" />
+        <echo msg="Preparing to deploy to ${env}..." />
+        <echo msg="========================================================================" />
+        <echo msg="Deleting old build and deploy dirs" />
+        <delete dir="./build/src/" includeemptydirs="true" failonerror="false" />
+        <delete dir="./deploy/" includeemptydirs="true" failonerror="false" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: create                                -->
+    <!-- ============================================  -->
+    <target name="create" depends="preparebuild">
+        <echo msg="Creating fresh build and deploy directories" />
+        <mkdir dir="./build/src/" />
+        <mkdir dir="./deploy/" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: gitclone                              -->
+    <!-- ============================================  -->
+    <target name="gitclone" depends="create">
+        <gitclone repository="${build.source}" targetPath="./build/src" />
+        <if>
+            <isset property="tag" />
+            <then>
+                <property name="branch" value="${tag}" />
+            </then>
+            <elseif>
+                <isset property="branch" />
+                <then>
+                    <property name="branch" value="${branch}" />
+                </then>
+            </elseif>
+            <else>
+                <property name="branch" value="master" />
+            </else>
+        </if>
+        <gitcheckout repository="./build/src" branchname="${branch}"/>
+        <property name="build.filename" value="${build.time}-${branch}"></property>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: composer                              -->
+    <!-- ============================================  -->
+    <target name="composer-install" description="Installs dependencies via composer install" depends="gitclone">
+        <echo msg="Running composer.phar self-update" />
+        <exec executable="php" dir="./build/src" passthru="true">
+            <arg value="composer.phar" />
+            <arg value="self-update" />
+        </exec>
+        <echo msg="Installing dependencies via Composer" />
+        <exec executable="php" dir="./build/src" passthru="true">
+            <arg value="composer.phar" />
+            <arg value="install" />
+            <arg value="--prefer-dist" />
+            <arg value="--no-dev" />
+        </exec>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- target: setenv                                -->
+    <!-- ============================================  -->
+    <target name="setenv" description="Sets the env variable in index.php" depends="composer-install">
+        <echo msg="Setting env variable..." />
+        <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+            <arg value="-i" />
+            <arg value="s/'ENVIRONMENT', 'local'/'ENVIRONMENT', '${env}'/" />
+            <arg value="./wwwroot/index.php" />
+        </exec>
+    </target>
+
+    <!-- ============================================ -->
+    <!-- target: setdbcreds                           -->
+    <!-- ============================================ -->
+    <target name="setdbcreds" description="Sets the database credentials in config.php" depends="setenv">
+        <if>
+            <or>
+                <equals arg1="${env}" arg2="prod" />
+                <equals arg1="${env}" arg2="test" />
+            </or>
+            <then>
+                <!-- Config files -->
+                <!-- Auth table  -->
+                <echo msg="Setting ${env} config db creds..." />
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{dbhost}/${locked.auth.db.host}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{dbuser}/${locked.auth.db.user}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{dbpass}/${locked.auth.db.pass}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/\${dbdb}/${locked.auth.db.db}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <!-- Grail tables  -->
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_host}/${locked.grail.db.host}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_user}/${locked.grail.db.user}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_pass}/${locked.grail.db.pass}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_db}/${locked.grail.db.db}/" />
+                    <arg value="./code_igniter/application/config/${env}/database.php" />
+                </exec>
+                <!-- Phinx -->
+                <echo msg="Setting ${env} phinx db creds..." />
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_host}/${locked.grail.db.host}/" />
+                    <arg value="./phinx.yml" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_user}/${locked.grail.db.user}/" />
+                    <arg value="./phinx.yml" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_pass}/${locked.grail.db.pass}/" />
+                    <arg value="./phinx.yml" />
+                </exec>
+                <exec executable="sed" dir="./build/src" checkreturn="true" passthru="true">
+                    <arg value="-i" />
+                    <arg value="s/%{${env}_grail_db_db}/${locked.grail.db.db}/" />
+                    <arg value="./phinx.yml" />
+                </exec>
+            </then>
+            <else>
+                <echo msg="Not setting prod db creds..." />
+            </else>
+        </if>
+    </target>
+
+
+    <!-- ============================================  -->
+    <!-- Target: preparedeploy                         -->
+    <!-- ============================================  -->
+    <target name="preparedeploy" depends="setdbcreds">
+        <echo msg="Preparing deploy" />
+        <copy todir="./deploy/" >
+            <fileset dir="./build/src">
+                <exclude name="composer.phar" />
+                <exclude name="composer.json" />
+                <exclude name="composer.lock" />
+                <exclude name="**/.git" />
+                <exclude name="**/.git/**" />
+                <exclude name="README.md" />
+                <exclude name=".gitignore" />
+                <exclude name="**/tests" />
+                <exclude name="**/build" />
+                <exclude name="build.xml" />
+                <exclude name="**/tests/**" />
+                <include name="**/*" />
+            </fileset>
+        </copy>
+        <mkdir dir="./deploy/logs" />
+        <echo msg="Deleting build src dir" />
+        <delete dir="./build/src" includeemptydirs="true" failonerror="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: copy files                            -->
+    <!-- ============================================  -->
+    <target name="filecopy" depends="build">
+        <echo msg="Creating tar file for file copy..." />
+        <tar destfile="${build.filename}.tar.gz" compression="gzip">
+            <fileset dir="./deploy">
+             <include name="**/**" />
+         </fileset>
+        </tar>
+        <echo msg="Starting file transfer" />
+        <exec command="scp ${build.filename}.tar.gz ${user}@${server.host}:${server.releases}" checkreturn="true" dir="./" passthru="true" />
+        <echo msg="Completed file transfer" />
+        <echo msg="Unpacking files..." />
+        <exec command="ssh ${user}@${server.host} 'cd ${server.releases}; mkdir ${build.filename}; tar -zxf ${build.filename}.tar.gz --directory=./${build.filename}'" checkreturn="true" dir="./" passthru="true" />
+    </target>
+
+    <!-- ============================================ -->
+    <!-- Target: set permissions                      -->
+    <!-- ============================================ -->
+    <target name="set-permissions" depends="filecopy">
+        <echo msg="Setting special permissions..." />
+        <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}/current; chmod -R 775 *'" checkreturn="true" passthru="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: migrate                               -->
+    <!-- ============================================  -->
+    <target name="migrate" description="Runs migrations" depends="set-permissions"> 
+    <if>
+        <isset property="ver" />
+        <then>
+            <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}/current; vendor/bin/phinx migrate -e ${env} -t ${ver}'" dir="./" checkreturn="true" passthru="true" />
+        </then>
+        <else>
+            <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}/current; vendor/bin/phinx migrate -e ${env}'" dir="./" checkreturn="true" passthru="true" />
+        </else>
+    </if>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: symlink change                        -->
+    <!-- ============================================  -->
+    <target name="symlink-change" depends="filecopy">
+        <echo msg="Making live..." />
+        <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}; ln -s ${server.releases}/${build.filename} next; unlink prev; mv current prev; mv -fT next current'" checkreturn="true" dir="./" passthru="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: clean                                 -->
+    <!-- ============================================  -->
+    <target name="clean" depends="symlink-change">
+        <echo msg="Cleaning up local files" />
+        <delete file="${build.filename}.tar.gz" includeemptydirs="true" />
+        <delete dir="./deploy" includeemptydirs="true" />
+        <echo msg="Cleaning up files on the server" />
+        <exec command="ssh ${user}@${server.host} 'cd ${server.releases}; rm ${build.filename}.tar.gz'" dir="./" passthru="true" />
+        <exec command="ssh ${user}@${server.host} 'cd ${server.releases}; [ $(ls -l | wc -l) -gt $((${max.releases}+1)) ] &amp;&amp; ( ls -tr | head -n 1 | xargs rm -rf; exit 1 )'" dir="./" passthru="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: migrate rollback                      -->
+    <!-- ============================================  -->
+    <target name="rollback-db" description="Rolls back database migrations"> 
+    <if>
+        <isset property="ver" />
+        <then>
+            <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}/current; vendor/bin/phinx rollback -e ${env} -t ${ver}'" dir="./" checkreturn="true" passthru="true" />
+        </then>
+        <else>
+            <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}/current; vendor/bin/phinx rollback -e ${env}'" dir="./" checkreturn="true" passthru="true" />
+        </else>
+    </if>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: migrate status                        -->
+    <!-- ============================================  -->
+    <target name="migrate-status" description="Prints status on migrations"> 
+        <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}/current; vendor/bin/phinx status -e ${env}'" dir="./" checkreturn="true" passthru="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: symlink change rollback               -->
+    <!-- ============================================  -->
+    <target name="rollback">
+        <echo msg="Rolling back to previous deploy..." />
+        <exec command="ssh ${user}@${server.host} 'cd ${server.basepath}; mv current rollback; mv prev current; mv rollback prev;'" checkreturn="true" dir="./" passthru="true" />
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: deploy                                -->
+    <!-- ============================================  -->
+    <target name="deploy" depends="clean, migrate, symlink-change, set-permissions, filecopy, build">
+        <echo msg="Deploy to ${env} was a success! Score!"></echo>
+    </target>
+
+    <!-- ============================================  -->
+    <!-- Target: build                                 -->
+    <!-- ============================================  -->
+    <target name="build" depends="preparedeploy, setdbcreds, setenv, composer-install, gitclone, create, preparebuild">
+        <echo msg="Finished build ${build.filename}" />
+    </target>
+
+    <!-- Display the available options -->
+    <target name="help" description="Displays the available options">
+        <echo msg="Getting started" />
+        <echo msg="------------------" />
+        <echo msg="To get started, try the `deploy` command. It handles database migrations, building " />
+        <echo msg=" the project, and transferring files. If you don't supply any parameters, " /> 
+        <echo msg=" it defaults to the master branch." />
+        <echo msg="" />
+        <echo msg="$ phing deploy -Denv=[env] -Dbranch=[branch] -D[tag]=[tag]" />
+        <echo msg="" />
+        <echo msg="Rolling back" />
+        <echo msg="------------------" />
+        <echo msg="Sometimes things go wrong. Use `rollback` to revert back to the previous deploy, " />
+        <echo msg=" and `migrate-rollback` if you need to revert the last database change. Its probably " />
+        <echo msg=" a good idea to verify a migration ran before rolling back any migrations "/>
+        <echo msg=" by using `migrate-status`." />
+        <echo msg="" />
+        <echo msg="$ phing rollback - Rolls back to previous deploy" />
+        <echo msg="$ phing migrate-rollback -Dver=[ver] - Rolls back to last migration (ver param optional)" />
+        <echo msg="$ phing migrate-status - Prints which migrations have been ran" />
+        <echo msg="" />
+        <echo msg="Optional tasks" />
+        <echo msg="------------------" />
+        <echo msg="You probably won't need these, as they are handled in the main `deploy`. But just in case."/>
+        <echo msg="" />
+        <echo msg="$ phing build - Builds new project" />
+        <echo msg="$ phing migrate - Runs database migrations" />
+        <echo msg="$ phing help - Displays the available options" />
+    </target>
+</project>
+
+
+

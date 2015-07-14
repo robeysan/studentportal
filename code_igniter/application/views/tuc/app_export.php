@@ -1,0 +1,42 @@
+<?php
+
+	echo   	
+			'|'. // DFLT_ID complex_DEMO (Allways empty)
+			$last_name.'|'.
+			$first_name.'|'.
+			$middle_name.'|'.
+			$prefix.'|'.
+			$suffix.'|'.
+			$social_tax_id.'|'.
+			$dob.'|'.
+			$address_type.'|'.
+			$address1.'|'.
+			$address2.'|'.
+			$city.'|'.
+			$state.'|'.
+			$country.'|'.
+			$zip_code.'|'.
+			$phone_type.'|'.
+			$home_phone_area_code.'|'.
+			$home_phone.'|'.
+			$prior_schools.'|'.
+			$start_term.'|'.
+			$gender.'|'.
+			$hispanic_latino.'|'.
+			$racial_identity.'|'.
+			$email.'|'.
+			$attending.'|'.
+			$degree_level.'|'.
+			$countrycitizen.'|'.
+			$prior_name.'|'.
+			$program_interest.'|'.
+			$englNative.'|'.
+			$language.'|'.
+			$curr_employer.'|'.
+			$military.'|'.
+			$military_branch.'|'.
+			$military_status.'|'.
+			$veteran.'|'.
+			$gibill.'|'.
+			$fin_aid."\r\n";
+?>

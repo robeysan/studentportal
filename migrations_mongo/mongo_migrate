@@ -1,0 +1,225 @@
+#!/bin/bash
+
+### BEGIN INFO
+# Provides:          Mongodb migration manager
+# Author:            Emerson Macedo - http://github.com/emerleite - http://codificando.com 
+# Description:       Generate migration script 
+### END INFO
+
+### SCRIPT FUNCTIONS
+
+usage() {
+    echo "Usage: mongo_migrate [options] [params]
+        -s       school (csp, aurora, fin)
+        -g       generate
+        -r       run
+        -t       target (up or down)
+        -f       migration_file|migration_name
+        -c       configuration file" >&2
+	  echo ""
+    exit 1
+}
+
+ensure_installed() {
+    if [ ! `type -P $1` ]
+    then
+        echo "$1 is not installed. Please install before continue."
+        exit 127
+    fi
+}
+
+ensure_migration_dir() {
+    if [ ! -d $MIGRATION_DIR ]
+    then
+        echo "Migration dir does not exist: $MIGRATION_DIR"
+        exit 1
+    fi
+}
+
+ensure_database() {
+    if [ -z $MONGO_DATABASE ]; then
+        echo "MONGO_DATABASE not defined"
+        echo "Define it at config.cfg\n"
+        exit 1
+    fi
+}
+
+generate_migration_file_name() {
+    echo "`date -u +%Y%m%d%H%M%S`_$1.js"
+}
+
+get_migration_file_name() {
+    if [ -e $MIGRATION_DIR$1 ];
+    then
+      echo $MIGRATION_DIR$1
+    else
+      echo "$MIGRATION_DIR$(find ./$MIGRATION_DIR -name '[0-9]*' |grep --color=never _$1.js |awk -F/ '{print $NF}')"
+    fi
+}
+
+check_migration() {
+    local file=`get_migration_file_name $1`
+    local total_files=`get_migration_file_name $1 |wc -l`
+
+    if [ ! $total_files = '1' ]; then 
+        echo "You have 2 files, please use the full file name"
+        echo "Files:"
+        echo "$file\n"
+        exit 1
+    fi
+
+    if [ ! -f $file ]; then
+        echo "Migration not found at $MIGRATION_DIR\n"
+        exit 1
+    fi
+}
+
+generate() {
+    echo "Generating migration ${1}"
+    local file=`generate_migration_file_name ${1}`
+    cp template/migration_template.js $MIGRATION_DIR$file
+    echo "Migration ${MIGRATION_DIR}${file} generated"
+}
+
+run_migration() {
+    local name=$1
+    local target=$2
+
+    echo "running migration ${name} ${target}"
+    ensure_installed mongo
+    ensure_database
+
+    if [[ $target != "up" && $target != "down" ]];then usage; fi
+
+    local file=`get_migration_file_name ${name}`
+
+    check_migration $name
+    
+    mongo $MONGO_HOST/$MONGO_DATABASE $auth --eval "target='${target}'" $file
+    if [ $? -ne 0 ];
+    then
+        echo "error executing migration."
+        exit 1
+    fi
+
+    [ $target = "up" ] && local inc="+1" || local inc="-1"
+    local migration_name="$(echo $file |awk -F/ '{print $NF}')"
+    local migration_time="$(echo $migration_name |cut -d_ -f1 |bc)"
+
+    update_current_migration `echo "$migration_time$inc"|bc`
+
+    echo "Migration ${name} ${target} executed"
+}
+
+get_current_migration() {
+    echo "`mongo $MONGO_HOST/$MONGO_DATABASE $auth --quiet ./get_current.js`"
+}
+
+update_current_migration() {
+    mongo $MONGO_HOST/$MONGO_DATABASE $auth --quiet --eval "current='${1}'" ./update_current.js
+}
+
+all_up() {
+    local current_migration=`get_current_migration|bc`
+
+    local migrations="$(find $MIGRATION_DIR -name \*.js |sort -n)"
+    for migration in $migrations
+    do
+        local migration_name="$(echo $migration |awk -F/ '{print $NF}')"
+        local migration_time="$(echo $migration_name |cut -d_ -f1 |bc)"
+        if [[ $migration_time -gt $current_migration ]]; then
+            run_migration $migration_name up
+        fi
+    done
+}
+
+all_down() {
+    local current_migration=`get_current_migration|bc`
+
+    local migrations="$(find $MIGRATION_DIR -name \*.js |sort -nr)"
+    for migration in $migrations
+    do
+        local migration_name="$(echo $migration |awk -F/ '{print $NF}')"
+        local migration_time="$(echo $migration_name |cut -d_ -f1 |bc)"
+        if [[ $migration_time -lt $current_migration ]]; then
+            run_migration $migration_name down
+        fi
+    done
+}
+
+run_all() {
+    local target=$1
+
+    if [[ $target = "up" ]]; then
+        all_up
+    elif [[ $target = "down" ]]; then
+        all_down
+    else
+        usage
+        exit 1
+    fi
+}
+
+## SCRIPT RUN
+
+#Convention configs
+MONGO_HOST=localhost
+MIGRATION_DIR="db/migrate/"
+CONFIG_PATH=./config.cfg
+
+#Parameter extraction
+while getopts "hf:c:t:grs:" OPT; do
+  case "$OPT" in
+  "h") usage;; # exibir ajuda
+  "s") SCHOOL=$OPTARG;;
+  "f") FILE_NAME=$OPTARG;;
+  "c") CONFIG_PATH=$OPTARG;;
+  "g") GENERATE=true;;
+  "r") RUN=true;;
+  "t") TARGET=$OPTARG;;
+  "?") exit -1;;
+  esac
+  done
+
+#Check script invocation
+[ -n "$GENERATE" -a -n "$RUN" ] && usage
+[ -n "$GENERATE" -a -z "$FILE_NAME" ] && usage
+[ -n "$GENERATE" -a "$SCHOOL" != "csp" -a "$SCHOOL" != "aurora" -a "$SCHOOL" != "fin" ] && usage
+
+[ -n "$RUN" -a "$TARGET" != "up" -a "$TARGET" != "down" ] && usage
+[ -n "$RUN" -a "$SCHOOL" != "csp" -a "$SCHOOL" != "aurora" -a "$SCHOOL" != "fin" ] && usage
+
+#load custom configs (overrides defaults)
+source $CONFIG_PATH
+
+#ensure trailing slash on MIGRATION_DIR
+MIGRATION_DIR=${MIGRATION_DIR%/}/${SCHOOL%/}/
+MONGO_DATABASE=${SCHOOL%}
+
+#Check migration dir
+ensure_migration_dir
+#Construct authentication phrase
+auth=""
+if [ $MONGO_USR ]; then
+	auth="$auth -u $MONGO_USR "
+fi
+
+if [ $MONGO_PWD ]; then
+	auth="$auth -p $MONGO_PWD "
+fi
+
+# Script running flow
+if [ $GENERATE ]; then
+    generate $FILE_NAME
+elif [ $RUN ]; then
+    if [ -z "$FILE_NAME" ]; then
+        run_all $TARGET
+    else
+        run_migration $FILE_NAME $TARGET
+    fi
+else
+    usage
+fi
+
+exit 0
+

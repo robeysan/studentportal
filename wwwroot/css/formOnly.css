@@ -1,0 +1,220 @@
+@charset "UTF-8";
+.bold {
+    font-weight: bold;
+}
+ul.app-check-list {
+    width:400px;
+    list-style-type: none;
+    padding: 5px, 5px;
+}
+.form-horizontal .control-label {
+  float: ;
+  width: 255px !important;
+  padding-top: 5px;
+  text-align: ;
+}
+#racial_identity {
+    margin-left: 245px;
+}
+/*form {
+	position:relative;
+	font:11px Verdana, Geneva, sans-serif;
+	padding:0;
+}
+form h3 {
+	width:600px;
+	border-bottom:1px solid #666;
+}
+
+form ol {
+	margin:0;
+	padding:0;
+}
+
+form ol li {
+	list-style-type:none;
+	margin:0;
+	padding:0;
+	width:auto;
+}
+
+form fieldset {
+	margin:0.5em 0;
+}
+
+form legend {
+	font:bold 1.5em/1.4em "Trebuchet MS", Arial, Helvetica, sans-serif;
+	margin:0;
+	padding:0 1em;
+	color:#633;
+}
+
+label {
+	padding:3px;
+	width:300px;
+	display:inline-block;
+	text-align:right;
+	font-weight:bold;
+	color:#666;
+}
+
+input[type="text"], select {
+	width:300px;
+	height:18px;
+	margin:3px;
+}
+
+td input[type="text"], select {
+	width:150px;
+	height:18px;
+	margin:3px;
+}
+
+input[type="radio"] {
+	display:inline-block;
+	margin:3px;
+}
+*/
+/*input[type="checkbox"] {
+	display:inline;
+}
+
+select {
+	height:20px;
+}*/
+
+/*.blockLabel {
+	float:none;
+	width:100%;
+	text-align:left;
+	display:inline;
+}
+
+.blockField {
+	display:block;
+	width:320px;
+	font-size:12px;
+}*/
+
+ol {
+    list-style: none;
+}
+input.v-phone7 {
+	/*display:inline-block;*/
+	width:8em;
+}
+
+input.v-phoneArea {
+	/*display:inline-block;*/
+	width:3em;
+}
+
+input.v-usDate {
+	width:10em;
+}
+
+input, select {
+    display: inline;
+    margin-bottom: 18px;
+}
+.note {
+	font:oblique 0.9em/0.9em Arial, Helvetica, sans-serif;
+	margin-left:220px;
+}
+
+fieldset .elp_program label {
+    margin-left: 25px;
+}
+
+fieldset {
+    margin-top: 18px;
+    margin-bottom: 18px;
+}
+
+label {
+    padding: 3px;
+    width: 120px;
+    float: left;
+    text-align: right;
+    margin-right: 6px;
+}
+.longtext label {
+    padding: 3px;
+    width: 280px !important;
+    float: left !important;
+    margin-right: 18px;
+}
+
+/*input[type="checkbox"] {
+display:inline-block;
+margin:3px;
+clear:both;
+ */}
+
+.formError {
+    background-image:url(../images/formError.png);
+    background-repeat:no-repeat;
+    background-position:left;
+    padding:0px 5px 3px 50px;
+    width:100%;
+    color:#630;
+    float:none;
+}
+
+.formValid {
+    background-image:url(../images/greenCheck.png);
+    background-repeat:no-repeat;
+    background-position:left;
+    padding-left:16px;
+    margin-left:3px;
+}
+
+.floatSubmit {
+    display:block;
+    width:330px;
+    text-align:right;
+    margin:1em 1.5em 0 0;
+}
+
+/* multi part formating */
+#steps { 
+    list-style:none; 
+    overflow:hidden; 
+    margin:0px; 
+    padding:0px;
+    height:40px;
+}
+
+#steps li {
+    font:normal 18px/28px Helvetica, Arial, sans-serif;
+    text-transform:capitalize;
+    float:left; 
+    padding:0 1em; 
+    color:#666;
+    height:50px;
+}
+
+#steps li:last-child {
+    border-right:none;
+}
+
+#steps li span {
+    font:bold normal 11px/14px Helvetica, Arial, sans-serif;
+    display:block;
+    color:#666;
+    clear:both;
+}
+
+#steps li.current {
+    color:#999;
+}
+
+#steps li.current span {
+    color:#999;
+}
+
+.label {
+    margin-left: 10px;
+}
+
+

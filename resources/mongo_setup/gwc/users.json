@@ -1,0 +1,1 @@
+{ "_id" : { "$oid" : "4f8dc77966f13a2fb4eafa01" }, "uid" : "2", "entity_id" : "8987", "type" : "EC", "first_name" : "Emily", "last_name" : "Fox", "title" : "Admissions Counselor", "email" : "probey@learninghouse.com", "phone" : "", "image_url" : "/img/user_profiles/2.jpg", "image_url_thumbnail" : "/img/user_profiles/2_thumb.jpg", "facebook_id" : "" }

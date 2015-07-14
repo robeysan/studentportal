@@ -1,0 +1,13 @@
+db.users.insert({
+  "email": "Ray Geroski <rgeroski@learninghouse.com>",
+  "entity_id": "5911",
+  "facebook_id": "",
+  "first_name": "Elizabeth",
+  "image_url": "/img/user_profiles/el.jpg",
+  "image_url_thumbnail": "/img/user_profiles/el-thumb.jpg",
+  "last_name": "Latshaw",
+  "phone": "",
+  "title": "Admissions Counselor",
+  "type": "EC - Primary",
+  "uid": "2"
+});

@@ -1,0 +1,178 @@
+body{
+	font-family:"Helvetica Neue", Helvetica, Arial, sans-serif !important
+	font-size: 13px;
+line-height: 18px;
+}
+a {
+    color: #006699;
+    text-decoration: none;
+}
+
+a:hover {
+    color: #333333;
+    text-decoration: none;
+    background-color:white;
+}
+a img {
+	border:none;
+}
+.container {
+width: 940px;
+margin-left: auto;
+margin-right: auto;
+}
+.navbar {
+	background-color:#2C2C2C;
+}
+.navbar .nav {
+position: relative;
+left: 0;
+display: block;
+float: left;
+margin: 0 10px 0 0;
+background-color: ;
+}
+.navbar .nav > li {
+display: block;
+float: left;
+}
+.dropdown {
+list-style-type: none;
+margin-left: 10px;
+position: relative;
+}
+.dropdown-menu {
+position: absolute;
+top: 100%;
+left: 0;
+float: left;
+min-width: 160px;
+max-width: 220px;
+padding: 4px 0;
+margin: 0;
+list-style: none;
+}
+div.account{
+	float: right;
+color: white;
+}
+.thumb {
+float: right;
+margin-top: 6px;
+max-width: 25px;
+max-height: 25px;
+}
+.seperator{
+	clear:both;
+	padding: 10px 0px 10px 0px;
+}
+.stepheader {
+width: 940px;
+border-bottom: 1px solid #E5E5E5;
+background: #efefef;
+left: 0px;
+text-align: center;
+margin-right: auto;
+margin-left: auto;
+}
+.stepheader img{
+	float:left;
+
+}
+.row {
+	clear:both;
+	padding: 10px 0px 10px 0px;
+}
+.left {
+	float:left;
+	width: 550px;
+}
+.right{
+	float:right;
+	width: 300px;
+}
+.right img {
+	max-width:250px;
+}
+.middle h1 {
+	padding-top:50px;
+}
+.middle p {
+}
+.middle img {
+	padding-right:10px;
+}
+.label {
+padding: 1px 3px 2px;
+font-size: 9.75px;
+font-weight: bold;
+color: white;
+text-transform: uppercase;
+background-color: #999;
+}
+.wall h1 {
+line-height: 1.1em;
+font-size: 16px;
+color: #333;
+}
+.wall .body a.name {
+color: #111;
+display: inline;
+margin-right: 10px;
+}
+.wall .body .event-type {
+display: inline;
+color: silver;
+font-size: 14px;
+}
+.wall p {
+font-size: 14px;
+font-color: #000;
+line-height: 1.5em;
+}
+.sml_icon {
+margin-right: 10px;
+float: left;
+}
+.wall img {
+display: block;
+}
+ul.testimonials {
+margin: 0 auto 0 auto;
+list-style: none;
+}
+ul.testimonials li {
+display: inline-block;
+margin-left: 10px;
+}
+ul.testimonials li div.test {
+background: white;
+padding: 6px 0px 0px 10px;
+}
+ul.testimonials li div.test img {
+float: left;
+max-width: 59px;
+display: inline;
+margin-right: 16px;
+height: 30px;
+width: 30px;
+}
+ul.testimonials li div.test .testDetails p {
+font-size: 93%;
+margin-bottom: 1px;
+}
+.dot {
+color: rgba(51, 51, 51, 0.6);
+margin-left: 3px;
+margin-right: 3px;
+}
+.send-message {
+font-size: 12px;
+}
+ul.testimonials li div.test .testDetails p {
+font-size: 93%;
+margin-bottom: 1px;
+}
+ul.testimonials li div.test .testDetails {
+	float: left;
+}
